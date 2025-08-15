@@ -1,7 +1,7 @@
 {
   "name": "live-polling-frontend",
   "version": "1.0.0",
-  "description": "Live Polling System Frontend with React and Vite",
+  "description": "Live Polling System frontend",
   "type": "module",
   "scripts": {
     "dev": "vite",

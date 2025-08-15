@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { socket } from "../socket.js"
+import ChatPopup from "./ChatPopup.jsx"
 
 export default function Teacher({ onBack }) {
   const [step, setStep] = useState("create")
@@ -13,6 +14,8 @@ export default function Teacher({ onBack }) {
   const [results, setResults] = useState(null)
   const [showParticipants, setShowParticipants] = useState(false)
   const [canAskNext, setCanAskNext] = useState(true)
+  const [pollHistory, setPollHistory] = useState([])
+  const [showHistory, setShowHistory] = useState(false)
 
   useEffect(() => {
     socket.emit("teacher:createPoll", null, ({ pollId }) => {
@@ -77,6 +80,19 @@ export default function Teacher({ onBack }) {
     setQuestion("")
     setOptions(["", ""])
     setResults(null)
+  }
+
+  const viewPollHistory = () => {
+    socket.emit("poll:history", { pollId }, (response) => {
+      if (response.ok) {
+        setPollHistory(response.history)
+        setShowHistory(true)
+      }
+    })
+  }
+
+  const backToResults = () => {
+    setShowHistory(false)
   }
 
   if (step === "create") {
@@ -155,6 +171,7 @@ export default function Teacher({ onBack }) {
             </div>
           )}
         </div>
+        {pollId && <ChatPopup pollId={pollId} who="Teacher" isTeacher={true} students={students} />}
       </div>
     )
   }
@@ -170,24 +187,120 @@ export default function Teacher({ onBack }) {
             Poll ID: <strong>{pollId}</strong>
           </div>
         </div>
+        {pollId && <ChatPopup pollId={pollId} who="Teacher" isTeacher={true} students={students} />}
       </div>
     )
   }
 
   if (step === "results") {
     const total = results?.total || 0
+    if (showHistory) {
+      return (
+        <div className="app-container">
+          <div className="main-card wide-card">
+            <div
+              style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}
+            >
+              <h2 style={{ fontSize: "24px", fontWeight: "600" }}>Poll History</h2>
+              <div style={{ display: "flex", gap: "12px" }}>
+                <button className="primary-btn" onClick={backToResults}>
+                  ← Back to Current Results
+                </button>
+                <button className="back-btn" onClick={onBack}>
+                  ← Back
+                </button>
+              </div>
+            </div>
+
+            {pollHistory.length === 0 ? (
+              <div style={{ textAlign: "center", color: "#6b7280", padding: "40px" }}>
+                <h3 style={{ fontSize: "18px", marginBottom: "8px" }}>No Previous Polls</h3>
+                <p>Poll history will appear here after you complete some questions.</p>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                {pollHistory.map((poll, index) => {
+                  const total = poll.total || 0
+                  const pollDate = new Date(poll.endedAt).toLocaleString()
+                  return (
+                    <div
+                      key={index}
+                      style={{
+                        border: "2px solid #e5e7eb",
+                        borderRadius: "12px",
+                        padding: "20px",
+                        background: "#fafafa",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          marginBottom: "16px",
+                        }}
+                      >
+                        <h3 style={{ fontSize: "18px", fontWeight: "600", color: "#374151" }}>
+                          Poll #{pollHistory.length - index}
+                        </h3>
+                        <span style={{ color: "#6b7280", fontSize: "14px" }}>{pollDate}</span>
+                      </div>
+
+                      <div className="question-container" style={{ marginBottom: "16px" }}>
+                        {poll.q}
+                      </div>
+
+                      <div className="results-container">
+                        {poll.options.map((option) => {
+                          const votes = poll.votes[option] || 0
+                          const percentage = total > 0 ? Math.round((votes / total) * 100) : 0
+                          return (
+                            <div key={option} className="result-item">
+                              <div className="result-header">
+                                <span className="result-option">{option}</span>
+                                <span className="result-percentage">
+                                  {percentage}% ({votes} votes)
+                                </span>
+                              </div>
+                              <div className="progress-bar">
+                                <div className="progress-fill" style={{ width: `${percentage}%` }}>
+                                  {percentage > 15 ? option : ""}
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+
+                      <div style={{ marginTop: "12px", color: "#6b7280", fontSize: "14px" }}>
+                        Total responses: {total}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+          {pollId && <ChatPopup pollId={pollId} who="Teacher" isTeacher={true} students={students} />}
+        </div>
+      )
+    }
+
     return (
       <div className="app-container">
         <div className="main-card wide-card">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
             <h2 style={{ fontSize: "24px", fontWeight: "600" }}>Question</h2>
             <div style={{ display: "flex", gap: "12px" }}>
-              <button className="history-btn">📊 View Poll History</button>
+              <button className="history-btn" onClick={viewPollHistory}>
+                📊 View Poll History
+              </button>
               <button className="back-btn" onClick={onBack}>
                 ← Back
               </button>
             </div>
           </div>
+
           <div className="question-container">{results?.q}</div>
           <div style={{ display: "flex", gap: "24px" }}>
             <div style={{ flex: 2 }}>
@@ -262,6 +375,7 @@ export default function Teacher({ onBack }) {
             </div>
           </div>
         </div>
+        {pollId && <ChatPopup pollId={pollId} who="Teacher" isTeacher={true} students={students} />}
       </div>
     )
   }

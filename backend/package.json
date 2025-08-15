@@ -1,7 +1,7 @@
 {
   "name": "live-polling-backend",
   "version": "1.0.0",
-  "description": "Live Polling System Backend with Express.js and Socket.io",
+  "description": "Live Polling System Backend",
   "main": "server.js",
   "type": "module",
   "scripts": {

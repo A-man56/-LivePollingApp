@@ -131,7 +131,7 @@ select {
 
 .role-card {
   flex: 1;
-  border: 2px solid #e5e7eb;
+  border: 2px solid #e5e7eb; 
   border-radius: 12px;
   padding: 24px;
   cursor: pointer;
@@ -139,19 +139,25 @@ select {
   text-align: left;
 }
 
-.role-card.student {
-  border-color: #6366f1;
-  background: #f8faff;
+.role-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border-color: #10b981; 
 }
 
-.role-card.teacher {
+.role-card.selected {
+  border-color: #10b981;
+  background: #f0fdf4; 
+}
+
+.role-card.student.selected {
   border-color: #10b981;
   background: #f0fdf4;
 }
 
-.role-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+.role-card.teacher.selected {
+  border-color: #10b981;
+  background: #f0fdf4;
 }
 
 .role-title {

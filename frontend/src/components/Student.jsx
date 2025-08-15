@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { socket } from "../socket.js"
+import ChatPopup from "./ChatPopup.jsx"
 
 export default function Student({ onBack }) {
   const [step, setStep] = useState("name")
@@ -88,6 +89,8 @@ export default function Student({ onBack }) {
     })
   }
 
+  const shouldShowChat = pollId && name && (step === "waiting" || step === "question" || step === "results")
+
   if (step === "name") {
     return (
       <div className="app-container">
@@ -102,7 +105,7 @@ export default function Student({ onBack }) {
             <label className="form-label">Enter your Name</label>
             <input
               className="input-field"
-              placeholder="Rahul Bajaj"
+              placeholder="Amanjeet"
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleNameSubmit()}
@@ -150,6 +153,7 @@ export default function Student({ onBack }) {
           <div className="loading-spinner"></div>
           <div className="waiting-message">Wait for the teacher to ask questions..</div>
         </div>
+        {shouldShowChat && <ChatPopup pollId={pollId} who={name} isTeacher={false} />}
       </div>
     )
   }
@@ -183,6 +187,7 @@ export default function Student({ onBack }) {
             {submitted ? "Submitted ✓" : "Submit"}
           </button>
         </div>
+        {shouldShowChat && <ChatPopup pollId={pollId} who={name} isTeacher={false} />}
       </div>
     )
   }
@@ -218,6 +223,7 @@ export default function Student({ onBack }) {
           </div>
           <div className="waiting-message">Wait for the teacher to ask a new question..</div>
         </div>
+        {shouldShowChat && <ChatPopup pollId={pollId} who={name} isTeacher={false} />}
       </div>
     )
   }
